@@ -14,3 +14,14 @@
   color: #888;
 }
 
+.project-container {
+  width: 100%;
+}
+
+.line{
+  margin: 20px;
+  display: block;
+  height: 2px;
+  width: 100%;
+  background-color: rgb(255, 255, 255);
+}

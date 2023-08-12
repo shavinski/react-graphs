@@ -1,13 +1,15 @@
 import './App.css'
 import {
   LineChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Line
+  Line,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
 
 const data = [
@@ -73,13 +75,45 @@ const data = [
   },
 ];
 
+const pieData1 = [
+  { name: 'Group Housing', value: 1000 },
+  { name: 'Group Childcare', value: 200 },
+  { name: 'Group Transportation', value: 250 },
+  { name: 'Group Utilities', value: 500 },
+]
+
+const pieData2 = [
+  { name: 'Housing 1', value: 1000 },
+  { name: 'Childcare 1', value: 100 },
+  { name: 'Childcare 2', value: 100 },
+  { name: 'Transportation 1', value: 50 },
+  { name: 'Transportation 2', value: 200 },
+  { name: 'Utilities 1', value: 100 },
+  { name: 'Utilities 1', value: 200 },
+  { name: 'Utilities 1', value: 200 },
+]
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
 function App() {
 
   return (
-    <div>
+    <div className='project-container'>
       <h1>Your Yearly Income to Budget</h1>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={600}>
         <LineChart
           width={1000}
           height={1000}
@@ -99,7 +133,17 @@ function App() {
           <Line type="monotone" dataKey="income" stroke="#5aa83b" fill="#5aa83b" />
         </LineChart>
       </ResponsiveContainer>
-    </div>
+
+      <span className='line'></span>
+      <h1>Pie Chart with Inputs</h1>
+
+      <ResponsiveContainer width="100%" height={500}>
+        <PieChart width={1000} height={1000}>
+          <Pie data={pieData1} dataKey="value" cx="50%" cy="50%" outerRadius={140} fill="#8884d8" />
+          <Pie data={pieData2} dataKey="value" cx="50%" cy="50%" innerRadius={160} outerRadius={180} fill="#82ca9d" label />
+        </PieChart>
+      </ResponsiveContainer>
+    </div >
   )
 }
 
