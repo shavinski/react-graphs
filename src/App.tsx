@@ -1,3 +1,5 @@
+import React from 'react';
+import { useState } from 'react';
 import './App.css'
 import {
   LineChart,
@@ -9,7 +11,7 @@ import {
   Line,
   PieChart,
   Pie,
-  Cell
+  Sector
 } from 'recharts';
 
 const data = [
@@ -75,40 +77,80 @@ const data = [
   },
 ];
 
-const pieData1 = [
-  { name: 'Group Housing', value: 1000 },
-  { name: 'Group Childcare', value: 200 },
-  { name: 'Group Transportation', value: 250 },
-  { name: 'Group Utilities', value: 500 },
-]
 
-const pieData2 = [
-  { name: 'Housing 1', value: 1000 },
-  { name: 'Childcare 1', value: 100 },
-  { name: 'Childcare 2', value: 100 },
-  { name: 'Transportation 1', value: 50 },
-  { name: 'Transportation 2', value: 200 },
-  { name: 'Utilities 1', value: 100 },
-  { name: 'Utilities 1', value: 200 },
-  { name: 'Utilities 1', value: 200 },
-]
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-
-const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+const renderActiveShape = (props) => {
+  const RADIAN = Math.PI / 180;
+  const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius + 10) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
 
   return (
-    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
+    <g>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="white">{`Monthly Amount: $${value}`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#999">
+        {`(Expense Ratio ${(percent * 100).toFixed(2)}%)`}
+      </text>
+    </g>
   );
 };
 
 function App() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [expenseData, setExpenseData] = useState([
+    { name: 'Housing', value: 1000 },
+    { name: 'Childcare', value: 400 },
+    { name: 'Transportation', value: 500 },
+    { name: 'Utilities', value: 500 },
+  ])
+
+  const onPieEnter = (_, index) => {
+    setActiveIndex(index);
+  };
+
+  function submitIncome() {
+
+  }
+
+
+  // with this function i want to
+  // add onto the value of the expense depending on which category
+
+  // need to access the expense data
+    // change the value of the key based on the inputs
+    // access the state and update 
+  function submitExpense(amount: number, category: string) {
+    
+  }
 
   return (
     <div className='project-container'>
@@ -137,12 +179,43 @@ function App() {
       <span className='line'></span>
       <h1>Pie Chart with Inputs</h1>
 
-      <ResponsiveContainer width="100%" height={500}>
-        <PieChart width={1000} height={1000}>
-          <Pie data={pieData1} dataKey="value" cx="50%" cy="50%" outerRadius={140} fill="#8884d8" />
-          <Pie data={pieData2} dataKey="value" cx="50%" cy="50%" innerRadius={160} outerRadius={180} fill="#82ca9d" label />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className='pie-container'>
+        <form action="">
+          <label htmlFor="income">Income</label>
+          <input type="text" />
+          <button onClick={submitIncome} type='submit'>Submit</button>
+        </form>
+
+        <ResponsiveContainer width="100%" height={600}>
+          <PieChart width={400} height={400}>
+            <Pie
+              activeIndex={activeIndex}
+              activeShape={renderActiveShape}
+              data={expenseData}
+              cx="50%"
+              cy="50%"
+              innerRadius={120}
+              outerRadius={155}
+              fill="#8884d8"
+              dataKey="value"
+              onMouseEnter={onPieEnter}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+
+        <form action="">
+          <label htmlFor="expenses">Expense</label>
+          <select name="expenses" id="expenses">
+            <option value="housing">Housing</option>
+            <option value="childcare">Childcare</option>
+            <option value="transportation">Transportation</option>
+            <option value="utilities">Utilities</option>
+          </select>
+          <label htmlFor="amount">Amount</label>
+          <input type="text" />
+          <button onClick={submitExpense} type='submit'>Submit</button>
+        </form>
+      </div>
     </div >
   )
 }
