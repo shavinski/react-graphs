@@ -94,7 +94,7 @@ const renderActiveShape = (props) => {
   return (
     <g>
       <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
-        {payload.name}
+        {payload.category}
       </text>
       <Sector
         cx={cx}
@@ -127,11 +127,11 @@ const renderActiveShape = (props) => {
 function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [expenseData, setExpenseData] = useState([
-    { name: 'Housing', value: 1000 },
-    { name: 'Childcare', value: 400 },
-    { name: 'Transportation', value: 500 },
-    { name: 'Utilities', value: 500 },
-  ])
+    { category: 'Housing', value: 1000 },
+    { category: 'Childcare', value: 400 },
+    { category: 'Transportation', value: 500 },
+    { category: 'Utilities', value: 500 },
+  ]);
 
   const onPieEnter = (_, index) => {
     setActiveIndex(index);
@@ -142,14 +142,30 @@ function App() {
   }
 
 
-  // with this function i want to
-  // add onto the value of the expense depending on which category
 
-  // need to access the expense data
-    // change the value of the key based on the inputs
-    // access the state and update 
-  function submitExpense(amount: number, category: string) {
-    
+  function submitExpense(event) {
+    event.preventDefault();
+
+    const expenseCategory = event.target.form.expenses.value
+    const amount = event.target.form.amount.value
+
+    console.log(expenseCategory, amount)
+
+    const updateExpenses = expenseData.map((expense) => {
+      console.log(expense)
+      const category = expense.category.toLowerCase();
+
+      if (category === expenseCategory) {
+        return {
+          ...expense,
+          value: expense.value + parseFloat(amount)
+        }
+      }
+
+      return expense
+    })
+
+    setExpenseData(updateExpenses)
   }
 
   return (
@@ -212,7 +228,7 @@ function App() {
             <option value="utilities">Utilities</option>
           </select>
           <label htmlFor="amount">Amount</label>
-          <input type="text" />
+          <input type="number" name='amount' id='amount' />
           <button onClick={submitExpense} type='submit'>Submit</button>
         </form>
       </div>
